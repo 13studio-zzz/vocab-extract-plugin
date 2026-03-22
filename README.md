@@ -7,7 +7,7 @@
 Claude Code에서 아래 명령어를 순서대로 입력하세요:
 
 ```
-/plugin marketplace add YOUR_GITHUB_USERNAME/vocab-extract-plugin
+/plugin marketplace add 13studio-zzz/vocab-extract-plugin
 /plugin install vocab-extract@vocab-extract-marketplace
 ```
 
