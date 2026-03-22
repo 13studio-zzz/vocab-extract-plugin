@@ -1,0 +1,11 @@
+{
+  "name": "vocab-extract",
+  "version": "1.0.0",
+  "description": "어휘 이미지에서 굵은 영단어/숙어와 한국어 뜻을 추출하여 마크다운 표로 출력합니다.",
+  "author": {
+    "name": "dohyung"
+  },
+  "license": "MIT",
+  "keywords": ["vocabulary", "english", "korean", "extract", "table"],
+  "skills": "./skills/"
+}
