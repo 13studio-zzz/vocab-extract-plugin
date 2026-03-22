@@ -13,39 +13,137 @@ description: >
 
 # Vocabulary Extractor
 
-Your job is to read vocabulary images and extract bold English words with their Korean
-meanings into a markdown table. Precision matters: you are the source of truth, so read
-carefully and extract completely.
+Your job is to read vocabulary images and extract only the **PRIMARY headwords** (표제어)
+with their Korean meanings into a markdown table. Precision matters: you are the source
+of truth, so read carefully.
 
-## How to read the images
+## 이미지 구조 이해 (매우 중요)
 
-Scan the image from top to bottom, line by line. For each line, ask: **is the English
-text bold and black?** If yes, extract it along with the Korean meaning to its right.
+이 단어장 이미지는 **[영어단어, 한국어뜻] 섹션**들로 이루어진 표 구조다.
+각 섹션은 번호(e.g., 0531, 0532)로 구분되며, 섹션 내부에는 두 종류의 단어가 있다:
 
-Bold text in these vocabulary books typically appears heavier/darker than surrounding
-text. Common patterns:
+### 추출 대상: PRIMARY 표제어 (검은색 굵은 볼드)
 
-- A single bold word: `price` → `가격, 가치(를 매기다)`
-- A bold phrase: `be ready to V` → `기꺼이 ~하다`
-- A bold phrase spanning multiple words: `in addition to` → `~뿐만 아니라`
+섹션 내 검은색 굵은 볼드 단어에는 **두 단계**가 존재할 수 있다. **둘 다 추출한다.**
 
-## What to include
+- **1단계 (가장 굵음)**: 섹션의 대표 표제어. 예) `limited`
+- **2단계 (약간 작지만 여전히 굵음)**: 대표 표제어보다 미세하게 작지만, 관련어보다는 **명확히 굵은** 단어. 예) `limit`
 
-Extract **all** bold English entries — even if they appear indented or seem like
-sub-entries. Indentation is irrelevant. If it's bold, extract it.
+> ⚠️ **색상 조건 — 반드시 검은색(black)이어야 한다**
+> 초록색(green), 회색(gray) 등 **검은색이 아닌 영어 단어는 굵기와 무관하게 절대 추출하지 않는다.**
+> 초록색 영어 단어가 다소 굵어 보여도 표제어가 아니므로 무시한다.
 
-## What to exclude
+### 추출 제외: 관련어 (얇은 글씨)
+- 표제어 아래에 줄지어 있는 파생어, 관련어, 숙어 등
+- 1단계·2단계 볼드보다 **확실히 얇고 가는** 글씨
+- 예) `limitation`, `unlimited` → 확실히 얇으므로 추출 제외
+- **절대 추출하지 않는다**
 
-Skip non-bold (light/thin) entries — these are derivatives, synonyms, or related forms
-that are intentionally de-emphasized (e.g., `appreciation`, `ending`, `fully`).
+> ⚠️ **중요 — 숙어/구동사도 PRIMARY가 될 수 있다**
+> 표제어 아래에 있는 숙어나 구동사라도 **시각적으로 표제어와 동일하게 크고 굵은 검은 볼드**라면 PRIMARY로 간주하고 추출한다.
+> 판단 기준은 위치(아래 줄)가 아니라 **글씨의 크기와 굵기**다.
+> 예) `deal with`가 `deal`과 동일한 크기/굵기 볼드 → PRIMARY ✓
+> 예) `bring about`이 `bring`보다 작은 볼드 → 관련어, 추출 제외 ✗
 
-## Parentheses for extra info
+### 추출 제외: 오른쪽 열 단어들
+- 페이지 오른쪽 열에 있는 단어들 (이탤릭 또는 얇은 글씨)
+- **절대 추출하지 않는다**
 
-If there is additional information next to the Korean meaning — such as verb conjugations
-written in green or small text, irregular forms, or part-of-speech markers — include it
-at the end of the meaning field inside parentheses.
+## 추출 방법
 
-Example: `멈추다, 잡다, 갖다 (hold held held)`
+1. **열(column)을 파악한다**: 페이지를 왼쪽 열과 오른쪽 열로 구분한다
+2. **섹션을 파악한다**: 번호(0531, 0532...)로 구분된 섹션들을 찾는다
+3. **각 섹션에서 PRIMARY를 찾는다**: 가장 크고 굵은 검은 볼드 영어 단어들을 식별한다
+4. **같은 행의 뜻을 찾는다**: PRIMARY 단어와 동일한 행에 있는 한국어 뜻을 가져온다
+5. **초록 얇은 글씨 확인**: 뜻 바로 우측에 초록 얇은 글씨가 있으면 뜻에 포함한다
+
+## 예시
+
+**섹션 0531** (PRIMARY 1개):
+- `effort` (PRIMARY, 크고 굵은 볼드) → `노력, 시도` ✓
+- `make an effort` (관련어, 작음) → 추출 제외 ✗
+- `in an effort to V` (관련어, 작음) → 추출 제외 ✗
+
+**섹션 0532** (PRIMARY 1개):
+- `electrical` (PRIMARY, 크고 굵은 볼드) → `전기의` ✓
+- `electricity` (관련어, 작음) → 추출 제외 ✗
+- `electric` (관련어, 작음) → 추출 제외 ✗
+- `electronic` (관련어, 작음) → 추출 제외 ✗
+
+**섹션 0537** (PRIMARY 2개 — 둘 다 추출):
+- `hurt` (PRIMARY) → `다치게 하다 (hurt : hurt : hurt)` ✓ ← 초록 얇은 글씨 포함
+- `smart` (PRIMARY) → `영리한, 아프다` ✓
+- `hurtful` (관련어) → 추출 제외 ✗
+
+**섹션 0538** (PRIMARY 2개 — 둘 다 추출):
+- `literally` (PRIMARY) → `문자 그대로, 정말로` ✓
+- `literature` (관련어) → 추출 제외 ✗
+- `letter` (PRIMARY) → `편지, 글자` ✓
+- `capital letter` (관련어) → 추출 제외 ✗
+
+**섹션 0539** (PRIMARY 2개 — 둘 다 추출):
+- `male` (PRIMARY) → `남성(의)` ✓
+- `female` (PRIMARY) → `여성(의)` ✓
+
+**섹션 0461** (PRIMARY 1개):
+- `fire` (PRIMARY) → `불, 사격[해고]하다` ✓
+- `firefighter` (관련어) → 추출 제외 ✗
+- `fireman` (관련어) → 추출 제외 ✗
+- `fireplace` (관련어) → 추출 제외 ✗
+
+**섹션 0376** (PRIMARY 2개 — 굵기 2단계 케이스):
+- `limited` (1단계, 가장 굵음) → `제한된` ✓
+- `limit` (2단계, 약간 작지만 명확히 굵음) → `한계, 경계, 제한(하다)` ✓
+- `limitation` (관련어, 확실히 얇음) → 추출 제외 ✗
+- `unlimited` (관련어, 확실히 얇음) → 추출 제외 ✗
+- `lid` (관련어, 확실히 얇음) → 추출 제외 ✗
+
+> 판단 기준: `limit`는 `limitation`보다 **명확히 굵다** → 추출 ✓
+> `limitation`은 `limit`보다 **확실히 얇다** → 제외 ✗
+
+## What to exclude (요약)
+
+- 표제어보다 **작은** 볼드 관련어(파생어, 숙어 등): e.g., `firefighter`, `electricity`, `make an effort`
+- **오른쪽 열** 단어들(이탤릭/얇은 글씨): e.g., `fiery`, `hydroelectric`, `electronically`
+- 오른쪽 열 단어는 굵게 보여도 추출하지 않는다
+
+## 같은 행의 초록 얇은 글씨 처리 (매우 중요)
+
+페이지에는 여러 줄에 걸쳐 초록색 글씨가 등장할 수 있다. 그 중 **반드시 포함해야 하는 것**과
+**절대 포함하면 안 되는 것**을 엄격히 구분한다.
+
+### 포함 규칙: 같은 행(row)에 있는 초록 얇은 글씨만
+
+```
+[굵은 검은 단어]  [한국어 뜻]  [초록 얇은 글씨] ← 이것만 포함
+```
+
+- 굵은 검은 단어와 **정확히 같은 줄(행)**에 있는 초록 얇은 글씨
+- 뜻(한국어) 바로 오른쪽에 위치
+- 해당 단어에 대한 보충 정보 (동사 변화형, 품사 표시 등)
+
+### 절대 포함 금지: 다른 행의 초록 글씨
+
+- 위 또는 아래 다른 줄에 있는 초록 글씨는 다른 단어에 속한 정보임
+- 행이 조금이라도 다르면 절대 포함하지 않는다
+- **"이 초록 글씨가 지금 처리 중인 단어와 같은 줄에 있는가?"** 를 반드시 확인
+
+### 출력 형식
+
+초록 글씨가 있는 경우 뜻 뒤에 괄호로 붙인다:
+
+```
+| hold | 잡다, 유지하다 (held held) |
+| leave | 떠나다 (left left) |
+| gradually | 점차적으로, 차츰 |        ← 초록 글씨 없으면 그냥 뜻만
+```
+
+### 판단 기준 체크리스트
+
+처리 중인 단어 행에서 초록 글씨를 찾을 때:
+1. 그 초록 글씨가 **같은 행의 뜻 오른쪽**에 있는가? → 포함
+2. 그 초록 글씨가 **윗줄 또는 아랫줄**에 있는가? → 제외
+3. 확신이 없으면 → 제외 (잘못 포함하는 것이 누락보다 나쁨)
 
 ## Output
 
@@ -53,12 +151,73 @@ Output **only** the markdown table below. No introduction, no explanation, no su
 Nothing before or after the table.
 
 ```
-| 영단어/숙어 | 뜻 |
+| 영단어 | 뜻 |
 |---|---|
-| price | 가격, 가치(를 매기다) |
-| praise | 칭찬, 찬양(하다) |
-| be ready to V | 기꺼이 ~하다 |
+| effort | 노력, 시도 |
+| electrical | 전기의 |
+| hurt | 다치게 하다 (hurt : hurt : hurt) |
+| smart | 영리한, 아프다 |
+| male | 남성(의) |
+| female | 여성(의) |
 ```
 
 If the user provides multiple images, process all of them in sequence and combine into
 one table in the order they appear.
+
+## Saving Rule (Excel 파일 생성 시)
+
+### 파일명 규칙
+
+이미지에서 확인된 섹션 번호 범위를 기반으로 파일명을 생성한다:
+- 복수 섹션: `단어_0461-0467.xlsx`
+- 단일 섹션: `단어_0461.xlsx`
+- 섹션 번호 불명: `단어장_YYYYMMDD.xlsx` (오늘 날짜)
+
+### 저장 위치 우선순위 (폴백 전략)
+
+아래 순서대로 시도하여 **최초로 쓰기 가능한 위치**에 저장한다.
+각 경로에 폴더가 없으면 자동 생성을 시도하고, 실패 시 다음 순위로 넘어간다.
+
+```
+1순위: ~/Desktop/단어장/
+2순위: ~/Documents/단어장/
+3순위: ~/단어장/          ← 홈 디렉토리 직하
+4순위: ./단어장/          ← 현재 작업 디렉토리
+5순위: /tmp/단어장/       ← 최후 수단 (재부팅 시 삭제됨, 사용자에게 경고)
+```
+
+Python으로 구현 시 다음 패턴을 사용한다:
+
+```python
+import os
+from pathlib import Path
+
+candidates = [
+    Path.home() / "Desktop" / "단어장",
+    Path.home() / "Documents" / "단어장",
+    Path.home() / "단어장",
+    Path.cwd() / "단어장",
+    Path("/tmp") / "단어장",
+]
+
+save_dir = None
+for candidate in candidates:
+    try:
+        candidate.mkdir(parents=True, exist_ok=True)
+        test_file = candidate / ".write_test"
+        test_file.touch()
+        test_file.unlink()
+        save_dir = candidate
+        break
+    except (PermissionError, OSError):
+        continue
+
+if save_dir is None:
+    raise RuntimeError("저장 가능한 경로를 찾을 수 없습니다.")
+```
+
+### 저장 후 사용자에게 반드시 알릴 것
+
+- 실제 저장된 전체 경로를 출력한다
+- 5순위(`/tmp/`)에 저장된 경우 "재부팅 시 삭제됩니다" 경고를 함께 출력한다
+- 예시: `저장 완료: /Users/dohyung/Desktop/단어장/단어_0461-0467.xlsx`
